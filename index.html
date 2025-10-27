@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ngeprompt - Voice to Prompt AI</title>
+    <!-- Dependensi Eksternal -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Styling Kustom -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-white text-slate-800 flex flex-col h-screen overflow-hidden">
+    
+    <!-- <canvas id="wave-canvas"></canvas> --> <!-- DIHAPUS -->
+
+    <!-- Main Content -->
+    <div class="relative z-10 flex flex-col flex-grow h-full p-4">
+        
+        <!-- Header -->
+        <header class="text-center pt-4 pb-2">
+            <img src="https://i.imgur.com/E8OwFxY.png" class="w-64 md:w-80 mx-auto" alt="Ngeprompt Logo">
+            <p class="text-sm text-slate-500 mt-2">Ngomong Aja jadi Prompt</p>
+        </header>
+
+        <!-- Main Interaction Area -->
+        <main class="flex-grow flex flex-col items-center justify-center space-y-4 md:space-y-8">
+            <div id="status" class="text-center text-slate-500 h-6 transition-opacity duration-300">Klik untuk membuat prompt</div>
+            <button id="mic-button" class="w-24 h-24 bg-white text-blue-500 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none shadow-lg relative idle-animation">
+                <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8h-1a6 6 0 11-12 0H3a7.001 7.001 0 006 6.93V17H7a1 1 0 100 2h6a1 1 0 100-2h-2v-2.07z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </main>
+
+        <!-- Bottom Sheet / Drawer -->
+        <footer id="bottom-sheet" class="bg-white/80 backdrop-blur-sm rounded-t-2xl shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.1)] p-4 transition-transform duration-500 ease-in-out transform translate-y-full flex flex-col">
+            <div class="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-4 flex-shrink-0"></div>
+            
+            <div id="sheet-content" class="space-y-4 max-h-[70vh] sm:max-h-[60vh] overflow-y-auto pb-4">
+                <!-- Selections -->
+                <div class="space-y-4" id="selections-view">
+                    <div>
+                        <label for="prompt-target" class="block text-sm font-medium text-slate-700">Tujuan Prompt:</label>
+                        <select id="prompt-target" class="mt-1 w-full bg-slate-100 border-transparent focus:border-blue-500 focus:ring-blue-500 rounded-lg p-2.5 transition">
+                            <option value="document" selected>Dokumen / Teks</option>
+                            <option value="image">Gambar (Image)</option>
+                            <option value="illustration">Ilustrasi</option>
+                            <option value="photo">Foto Realistis</option>
+                            <option value="product-photo">Foto Produk</option>
+                            <option value="animation">Animasi / Video</option>
+                            <option value="paper">Paper / Karya Ilmiah</option>
+                            <option value="code">Program / Kode</option>
+                            <option value="simple-analysis">Analisa Sederhana</option>
+                            <option value="complex-analysis">Analisa Kompleks</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="prompt-framework" class="block text-sm font-medium text-slate-700">Kerangka Prompt:</label>
+                        <select id="prompt-framework" class="mt-1 w-full bg-slate-100 border-transparent focus:border-blue-500 focus:ring-blue-500 rounded-lg p-2.5 transition">
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div class="space-y-4 hidden" id="results-view">
+                    <h3 class="text-lg font-bold text-center text-slate-800">Hasil Rekayasa Prompt</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="raw-transcript" class="block text-sm font-medium text-slate-700">Transkrip Suara Anda:</label>
+                            <textarea id="raw-transcript" rows="6" class="mt-1 w-full bg-slate-100 border-transparent rounded-lg p-3 text-sm"></textarea>
+                        </div>
+                        <div>
+                            <label for="structured-prompt" class="block text-sm font-medium text-slate-700">Prompt Hasil Olahan AI:</label>
+                             <textarea id="structured-prompt" rows="6" class="mt-1 w-full bg-slate-100 border-transparent rounded-lg p-3 text-sm" placeholder="Rekomendasi AI akan muncul di sini..."></textarea>
+                        </div>
+                    </div>
+                    <!-- JSON Toggle Switch -->
+                    <div class="flex items-center justify-end pt-2 pr-1">
+                        <label for="json-toggle" class="text-sm font-medium text-slate-600 mr-3">Tampilkan sebagai JSON</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="json-toggle" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+                    <div id="loading-indicator" class="hidden items-center justify-center p-4">
+                        <div class="spinner"></div>
+                        <span class="ml-3 text-slate-500">AI sedang membuat rekomendasi...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sticky Action Buttons -->
+            <div id="action-buttons" class="flex-shrink-0 flex justify-center items-center gap-4 p-4 border-t border-slate-200 hidden">
+                <button id="copy-button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300">Salin Prompt</button>
+                <button id="restart-button" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-6 rounded-lg transition-colors duration-300">Mulai Lagi</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Logika Aplikasi Kustom -->
+    <script src="app.js" defer></script>
+</body>
+</html>
